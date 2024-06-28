@@ -1,0 +1,32 @@
+---
+# tasks file for nginx
+- name: dir create
+  file:
+    path: /home/{{ ansible_user }}/nginx
+    state: directory
+    mode: '0755'
+  
+- name: Generate nginx.conf
+  copy:
+    content: |
+      events {
+      }
+
+      http {
+              include mime.types;
+
+              server {
+                      listen 80;
+                      server_name localhost;
+                      root /sites;
+
+                      index index.php index.html;
+
+                      location ~ \.php$ {
+                              include fastcgi_params;
+                              include fastcgi.conf;
+                              fastcgi_pass 127.0.0.1:9000;
+                      }
+              }
+      }
+    dest: /home/{{ ansible_user }}/nginx/nginx.conf

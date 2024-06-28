@@ -1,0 +1,15 @@
+- name: Test-Case
+  hosts: all
+  become: yes
+  
+  roles:
+  - deploy
+  - nginx
+  - php
+  - docker
+
+  tasks: 
+  - name: Run docker-compose
+    shell: docker compose up -d
+    args:
+      chdir: /home/{{ ansible_user }}

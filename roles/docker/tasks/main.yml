@@ -1,0 +1,60 @@
+---
+# tasks file for docker
+- name: Get list of all containers
+  command: docker ps -qa
+  register: result
+
+- name: Stop all running containers
+  docker_container:
+    name: "{{ item }}"
+    state: stopped
+  with_items: "{{ result.stdout_lines }}"
+  ignore_errors: true
+
+- name: Remove all containers
+  docker_container:
+    name: "{{ item }}"
+    state: absent
+  with_items: "{{ result.stdout_lines }}"
+  ignore_errors: true
+
+- name: Uninstall old versions
+  apt:
+    name:
+      - docker.io
+      - docker-doc
+      - docker-compose
+      - docker-compose-v2
+      - podman-docker
+      - containerd
+      - runc
+    state: absent
+  ignore_errors: true
+
+- name: Add Docker's official GPG key
+  shell: |
+    install -m 0755 -d /etc/apt/keyrings
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+    chmod a+r /etc/apt/keyrings/docker.asc
+
+- name: Add the repository to Apt sources
+  shell: |
+    echo \
+      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+      $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+      tee /etc/apt/sources.list.d/docker.list > /dev/null
+    apt-get update
+
+- name: Install the Docker packages
+  apt:
+    name: 
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+
+- name: Manage Docker as a non-root user
+  shell: |
+    usermod -aG docker {{ ansible_user }}
