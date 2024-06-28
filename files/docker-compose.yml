@@ -5,8 +5,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: tail -f /dev/null # Чтобы контейнер оставался активным.
-    stdin_open: true # Устанавливает интерактивный режим для стандартного ввода (stdin).
+    stdin_open: true # Устанавливает интерактивный режим для стандартного ввода, чтобы контейнер оставался активным (stdin).
     container_name: mydocker
     volumes:
       - /home/neutron/nginx/nginx.conf:/etc/nginx/nginx.conf
